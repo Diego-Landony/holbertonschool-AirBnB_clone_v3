@@ -1,35 +1,35 @@
 #!/usr/bin/python3
-"""Script that starts a Flask app"""
+"""Flask server (variable app)
+"""
+
+
 from flask import Flask, jsonify
-from flask_cors import CORS
 from models import storage
-from api.v1.views import app_views
 from os import getenv
+from api.v1.views import app_views
 
-
-"""Start Flask"""
 app = Flask(__name__)
-
-"""Register the blueprint app_views"""
 app.register_blueprint(app_views)
-
-"""Create the CORS instance to allow IPs"""
-CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
+app.url_map.strict_slashes = False
 
 
 @app.teardown_appcontext
-def teardown(exception):
-    """Closes session"""
+def downtear(self):
+    '''Status of your API'''
     storage.close()
 
 
 @app.errorhandler(404)
-def errorhandler(error):
-    """Returns a JSON-formated status code for errors"""
-    return jsonify({"error": "Not found"}), 404
+def page_not_found(error):
+    '''return render_template'''
+    return jsonify('error='Not found'), 404
 
 
 if __name__ == "__main__":
-    API_HOST = getenv("HBNB_API_HOST", "0.0.0.0")
-    API_PORT = getenv("HBNB_API_PORT", 5000)
-    app.run(host=API_HOST, port=API_PORT, threaded=True)
+    host = getenv('HBNB_API_HOST')
+    port = getenv('HBNB_API_PORT')
+    if not host:
+        host = '0.0.0.0'
+    if not port:
+        port = '5000'
+    app.run(host=host, port=port, threaded=True)
